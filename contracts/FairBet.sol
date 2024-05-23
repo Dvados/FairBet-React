@@ -35,14 +35,14 @@ contract Betting {
         uint userId;
         string userName;
         uint balance;
-        //uint[] bidHistory;
+        uint[] betHistory;
     }
 
     // -------------------------------
     // Bets
     uint public betCount;
 
-    mapping(uint => Bet) public bets;
+    mapping(uint => Bet) public allBets;
 
     struct Bet {
         uint matchId;
@@ -85,11 +85,11 @@ contract Betting {
     function createUserProfile(string memory _name) public {
         require(bytes(_name).length > 0, "Name cannot be empty");
 
-        require(users[msg.sender].userId > 0, "User already exists");
+        require(users[msg.sender].userId == 0, "User already exists");
 
         userCount++;
 
-        users[msg.sender] = User(userCount, _name, 0);
+        users[msg.sender] = User(userCount, _name, 0, new uint[](0));
 
         emit UserCreated(msg.sender, userCount, _name);
     }
@@ -103,6 +103,8 @@ contract Betting {
 
         require(msg.value > 0, "Bet amount must be greater than zero");
 
+        require(_selection == Selection.TeamA || _selection == Selection.TeamB || _selection == Selection.Draw, "Invalid selection");
+
         if (_selection == Selection.TeamA) {                    // teamA
             matches[_matchId].betAmountTeamA += msg.value;
         } else if (_selection == Selection.TeamB) {             // teamB
@@ -113,15 +115,17 @@ contract Betting {
 
         betCount++;
 
-        bets[betCount] = Bet(_matchId, msg.sender, msg.value, _selection);
+        allBets[betCount] = Bet(_matchId, msg.sender, msg.value, _selection);
+
+        users[msg.sender].betHistory.push(betCount);
 
         emit BetPlaced(betCount, _matchId, msg.sender, msg.value, _selection);
     }
 
     // -------------------------------
 
-    function PauseBets(uint _matchId) public onlyOwner {
+    function pauseBets(uint _matchId) public onlyOwner {
         matches[_matchId].matchStatus = Status.BetsPaused;
     }
-    
+
 }
