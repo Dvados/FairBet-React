@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.26;
 
 contract Betting {
     // Owner
@@ -7,7 +7,7 @@ contract Betting {
 
     // -------------------------------
     // Matches
-    uint public matchId;
+    uint public matchCount;
 
     mapping(uint => Match) public matches;
 
@@ -27,19 +27,22 @@ contract Betting {
     }
 
     // -------------------------------
-    // Players
-    mapping(address => Player) public players;
+    // Users
+    uint public userCount;
 
-    struct Player {
+    mapping(address => User) public users;
+
+    struct User {
         uint id;
         string name;
         uint balance;
-        uint[] bidHistory;
+        //uint[] bidHistory;
     }
 
     // -------------------------------
 
     event MatchCreated(uint indexed matchId, string teamA, string teamB);
+    event UserCreated(address indexed userAddress, uint userId, string name);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
@@ -51,8 +54,18 @@ contract Betting {
     }
 
     function createMatch(string memory _teamA, string memory _teamB) public onlyOwner {
-        matchId++;
-        matches[matchId] = Match(matchId, _teamA, _teamB, 0, 0, 0, Status.Bets, Exodus.NotFinished);
-        emit MatchCreated(matchId, _teamA, _teamB);
+        matchCount++;
+        matches[matchCount] = Match(matchCount, _teamA, _teamB, 0, 0, 0, Status.Bets, Exodus.NotFinished);
+        emit MatchCreated(matchCount, _teamA, _teamB);
     }
+
+    function createProfile(string memory _name) public {
+        require(bytes(_name).length > 0, "Name cannot be empty");
+        require(users[msg.sender].id == 0, "User already exists");
+
+        userCount++;
+        users[msg.sender] = User(userCount, _name, 0);
+        emit UserCreated(msg.sender, userCount, _name);
+    }
+
 }
