@@ -45,6 +45,7 @@ contract Betting {
     mapping(uint => Bet) public allBets;
 
     struct Bet {
+        uint timestamp;
         uint matchId;
         address better;
         uint amount;
@@ -58,6 +59,7 @@ contract Betting {
     event MatchCreated(uint indexed matchId, string teamA, string teamB);
     event UserCreated(address indexed userAddress, uint userId, string name);
     event BetPlaced(uint indexed betId, uint matchId, address better, uint amount, Selection selection);
+    event MatchFinished(uint indexed matchId, Result matchResult);
 
     // -------------------------------
 
@@ -115,7 +117,7 @@ contract Betting {
 
         betCount++;
 
-        allBets[betCount] = Bet(_matchId, msg.sender, msg.value, _selection);
+        allBets[betCount] = Bet(block.timestamp, _matchId, msg.sender, msg.value, _selection);
 
         users[msg.sender].betHistory.push(betCount);
 
@@ -126,6 +128,19 @@ contract Betting {
 
     function pauseBets(uint _matchId) public onlyOwner {
         matches[_matchId].matchStatus = Status.BetsPaused;
+    }
+
+    // -------------------------------
+
+    function finishMatch(uint _matchId, Result _result) public onlyOwner {
+        require(matches[_matchId].matchStatus != Status.Finished, "Match already finished");
+
+        require(_result != Result.NotFinished, "Invalid result");
+
+        matches[_matchId].matchStatus = Status.Finished;
+        matches[_matchId].matchResult = _result;
+
+        emit MatchFinished(_matchId, _result);
     }
 
 }
