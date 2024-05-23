@@ -11,20 +11,19 @@ contract Betting {
 
     mapping(uint => Match) public matches;
 
-    enum Status { Bets, Live, Finished }
-
-    enum Exodus { NotFinished, TeamA, Draw, TeamB }
-
     struct Match {
-        uint id;
         string teamA;
         string teamB;
         uint betAmountTeamA;
         uint betAmountDraw;
         uint betAmountTeamB;
         Status matchStatus;
-        Exodus matchResult;
+        Result matchResult;
     }
+
+    enum Status { Bets, Live, Finished }
+
+    enum Result { NotFinished, TeamA, TeamB, Draw }
 
     // -------------------------------
     // Users
@@ -40,9 +39,25 @@ contract Betting {
     }
 
     // -------------------------------
+    // Bets
+    uint public betCount;
+
+    mapping(uint => Bet) public bets;
+
+    struct Bet {
+        uint matchId;
+        address better;
+        uint amount;
+        Selection resultSelection;
+    }
+
+    enum Selection { TeamA, TeamB, Draw }
+
+    // -------------------------------
 
     event MatchCreated(uint indexed matchId, string teamA, string teamB);
     event UserCreated(address indexed userAddress, uint userId, string name);
+    event BetPlaced(uint indexed betId, uint matchId, address better, uint amount, Selection selection);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
@@ -55,7 +70,9 @@ contract Betting {
 
     function createMatch(string memory _teamA, string memory _teamB) public onlyOwner {
         matchCount++;
-        matches[matchCount] = Match(matchCount, _teamA, _teamB, 0, 0, 0, Status.Bets, Exodus.NotFinished);
+
+        matches[matchCount] = Match(_teamA, _teamB, 0, 0, 0, Status.Bets, Result.NotFinished);
+
         emit MatchCreated(matchCount, _teamA, _teamB);
     }
 
@@ -64,8 +81,29 @@ contract Betting {
         require(users[msg.sender].id == 0, "User already exists");
 
         userCount++;
+
         users[msg.sender] = User(userCount, _name, 0);
+
         emit UserCreated(msg.sender, userCount, _name);
+    }
+
+    function placeBet(uint _matchId, Selection _selection) public payable {
+        require(matches[_matchId].matchStatus == Status.Bets, "Bets are no longer accepted.");
+        require(msg.value > 0, "Bet amount must be greater than zero");
+
+        if (_selection == Selection.TeamA) { // teamA
+            matches[_matchId].betAmountTeamA += msg.value;
+        } else if (_selection == Selection.TeamB) { // teamB
+            matches[_matchId].betAmountTeamB += msg.value;
+        } else { // Draw
+            matches[_matchId].betAmountDraw += msg.value;
+        }
+
+        betCount++;
+
+        bets[betCount] = Bet(_matchId, msg.sender, msg.value, _selection);
+
+        emit BetPlaced(betCount, _matchId, msg.sender, msg.value, _selection);
     }
 
 }
