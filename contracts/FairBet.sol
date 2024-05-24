@@ -63,6 +63,9 @@ contract Betting {
     event UserCreated(address indexed userAddress, uint userId, string name);
     event BetPlaced(uint indexed betId, uint matchId, address better, uint amount, Selection selection);
     event MatchFinished(uint indexed matchId, Result matchResult);
+    event Withdrawal(uint indexed withdrawalId, address user, uint amount);
+
+    uint withdrawalCount;
 
     // -------------------------------
 
@@ -169,6 +172,8 @@ contract Betting {
         }
     }
 
+    // -------------------------------
+
     function distributeWinnings(uint _matchId) private {
         Match storage m = matches[_matchId];
         
@@ -194,6 +199,22 @@ contract Betting {
                 users[b.better].balance += reward;
             }
         }
+    }
+
+    // -------------------------------
+
+    function withdraw() public {
+        require(users[msg.sender].userId != 0, "Create an account");
+        
+        uint amount = users[msg.sender].balance;
+
+        require(amount > 0, "No balance to withdraw");
+
+        payable(msg.sender).transfer(amount);
+
+        users[msg.sender].balance = 0;
+
+        emit Withdrawal(++withdrawalCount, msg.sender, amount);
     }
 
 }
