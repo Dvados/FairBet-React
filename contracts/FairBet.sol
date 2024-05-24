@@ -55,7 +55,7 @@ contract Betting {
         Selection resultSelection;
     }
 
-    enum Selection { TeamA, TeamB, Draw }
+    enum Selection { Nothing, TeamA, TeamB, Draw }
 
     // -------------------------------
 
@@ -145,6 +145,8 @@ contract Betting {
         matches[_matchId].matchStatus = Status.Finished;
         matches[_matchId].matchResult = _result;
 
+        distributeWinnings(_matchId);
+
         emit MatchFinished(_matchId, _result);
     }
 
@@ -165,15 +167,33 @@ contract Betting {
         if(m.betAmountDraw != 0){
             m.oddsDraw = totalAmount * 1e18 / m.betAmountDraw;
         }
-
     }
 
     function distributeWinnings(uint _matchId) private {
+        Match storage m = matches[_matchId];
+        
+        uint winningAmount;
+        uint odds;
 
-    }
+        if (m.matchResult == Result.TeamA) {
+            winningAmount = m.betAmountTeamA;
+            odds = m.oddsTeamA;
+        } else if (m.matchResult == Result.TeamB) {
+            winningAmount = m.betAmountTeamB;
+            odds = m.oddsTeamB;
+        } else if (m.matchResult == Result.Draw) {
+            winningAmount = m.betAmountDraw;
+            odds = m.oddsDraw;
+        }
 
-    function test() public pure returns (uint a) {
-        a = type(uint).max;
+        for (uint i = 1; i <= betCount; i++) {
+            Bet storage b = allBets[i];
+
+            if (b.matchId == _matchId && uint(b.resultSelection) == uint(m.matchResult)) {
+                uint reward = b.amount * odds / 1e18;
+                users[b.better].balance += reward;
+            }
+        }
     }
 
 }
