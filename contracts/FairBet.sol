@@ -15,8 +15,11 @@ contract Betting {
         string teamA;
         string teamB;
         uint betAmountTeamA;
-        uint betAmountDraw;
         uint betAmountTeamB;
+        uint betAmountDraw;
+        uint oddsTeamA;
+        uint oddsTeamB;
+        uint oddsDraw;
         Status matchStatus;
         Result matchResult;
     }
@@ -77,7 +80,7 @@ contract Betting {
     function createMatch(string memory _teamA, string memory _teamB) public onlyOwner {
         matchCount++;
 
-        matches[matchCount] = Match(_teamA, _teamB, 0, 0, 0, Status.Bets, Result.NotFinished);
+        matches[matchCount] = Match(_teamA, _teamB, 0, 0, 0, 1, 1, 1, Status.Bets, Result.NotFinished);
 
         emit MatchCreated(matchCount, _teamA, _teamB);
     }
@@ -115,6 +118,8 @@ contract Betting {
             matches[_matchId].betAmountDraw += msg.value;
         }
 
+        getOdds(_matchId);
+
         betCount++;
 
         allBets[betCount] = Bet(block.timestamp, _matchId, msg.sender, msg.value, _selection);
@@ -141,6 +146,34 @@ contract Betting {
         matches[_matchId].matchResult = _result;
 
         emit MatchFinished(_matchId, _result);
+    }
+
+    // -------------------------------
+
+    function getOdds(uint _matchId) private {
+        Match storage m = matches[_matchId];
+        uint totalAmount = m.betAmountTeamA + m.betAmountTeamB + m.betAmountDraw;
+
+        if(m.betAmountTeamA != 0){
+            m.oddsTeamA = totalAmount * 1e18 / m.betAmountTeamA;
+        }
+
+        if(m.betAmountTeamB != 0){
+            m.oddsTeamB = totalAmount * 1e18 / m.betAmountTeamB;
+        }
+
+        if(m.betAmountDraw != 0){
+            m.oddsDraw = totalAmount * 1e18 / m.betAmountDraw;
+        }
+
+    }
+
+    function distributeWinnings(uint _matchId) private {
+
+    }
+
+    function test() public pure returns (uint a) {
+        a = type(uint).max;
     }
 
 }
