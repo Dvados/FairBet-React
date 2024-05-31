@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-contract Betting {
+contract FairBet {
     // Owner
     address public owner;
 
@@ -30,16 +30,7 @@ contract Betting {
 
     // -------------------------------
     // Users
-    uint public userCount;
-
-    mapping(address => User) public users;
-
-    struct User {
-        uint userId;
-        string userName;
-        uint balance;
-        uint[] betHistory;
-    }
+    mapping(address => uint) public users;
 
     // -------------------------------
     // Bets
@@ -60,7 +51,6 @@ contract Betting {
     // -------------------------------
 
     event MatchCreated(uint indexed matchId, string teamA, string teamB);
-    event UserCreated(address indexed userAddress, uint userId, string name);
     event BetPlaced(uint indexed betId, uint matchId, address better, uint amount, Selection selection);
     event MatchFinished(uint indexed matchId, Result matchResult);
     event Withdrawal(uint indexed withdrawalId, address user, uint amount);
@@ -90,24 +80,8 @@ contract Betting {
 
     // -------------------------------
 
-    function createUserProfile(string memory _name) public {
-        require(bytes(_name).length > 0, "Name cannot be empty");
-
-        require(users[msg.sender].userId == 0, "User already exists");
-
-        userCount++;
-
-        users[msg.sender] = User(userCount, _name, 0, new uint[](0));
-
-        emit UserCreated(msg.sender, userCount, _name);
-    }
-
-    // -------------------------------
-
     function placeBet(uint _matchId, Selection _selection) public payable {
-        require(users[msg.sender].userId != 0, "Create an account");
-
-        require(matches[_matchId].matchStatus == Status.Bets, "Bets are no longer accepted.");
+        require(matches[_matchId].matchStatus == Status.Bets, "Bets are no longer accepted");
 
         require(msg.value > 0, "Bet amount must be greater than zero");
 
@@ -126,8 +100,6 @@ contract Betting {
         betCount++;
 
         allBets[betCount] = Bet(block.timestamp, _matchId, msg.sender, msg.value, _selection);
-
-        users[msg.sender].betHistory.push(betCount);
 
         emit BetPlaced(betCount, _matchId, msg.sender, msg.value, _selection);
     }
@@ -196,7 +168,7 @@ contract Betting {
 
             if (b.matchId == _matchId && uint(b.resultSelection) == uint(m.matchResult)) {
                 uint reward = b.amount * odds / 1e18;
-                users[b.better].balance += reward;
+                users[b.better] += reward;
             }
         }
     }
@@ -204,15 +176,14 @@ contract Betting {
     // -------------------------------
 
     function withdraw() public {
-        require(users[msg.sender].userId != 0, "Create an account");
         
-        uint amount = users[msg.sender].balance;
+        uint amount = users[msg.sender];
 
         require(amount > 0, "No balance to withdraw");
 
         payable(msg.sender).transfer(amount);
 
-        users[msg.sender].balance = 0;
+        users[msg.sender] = 0;
 
         emit Withdrawal(++withdrawalCount, msg.sender, amount);
     }
