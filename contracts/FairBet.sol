@@ -73,7 +73,7 @@ contract FairBet {
     function createMatch(string memory _teamA, string memory _teamB) public onlyOwner {
         matchCount++;
 
-        matches[matchCount] = Match(_teamA, _teamB, 0, 0, 0, 1, 1, 1, Status.Bets, Result.NotFinished);
+        matches[matchCount] = Match(_teamA, _teamB, 0, 0, 0, 1e18, 1e18, 1e18, Status.Bets, Result.NotFinished);
 
         emit MatchCreated(matchCount, _teamA, _teamB);
     }
