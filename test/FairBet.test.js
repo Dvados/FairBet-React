@@ -118,7 +118,7 @@ describe('FairBet', function() {
     const createMatchTx = await fairBet.createMatch('Real Madrid', 'Barcelona');
     await createMatchTx.wait();
 
-    const numberOfBets = 100;  // Number of random bets
+    const numberOfBets = 1000;  // Number of random bets
 
     for (let i = 0; i < numberOfBets; i++) {
       // Select a random user
@@ -162,7 +162,7 @@ describe('FairBet', function() {
     let expectedOddsTeamB = 1;
     let expectedOddsDraw = 1;
 
-    const numberOfBets = 100;
+    const numberOfBets = 1000;
 
     for (let i = 0; i < numberOfBets; i++) {
       const randomUserIndex = Math.floor(Math.random() * users.length);
@@ -188,9 +188,9 @@ describe('FairBet', function() {
 
       const match = await fairBet.matches(1);
 
-      expect(Number(ethers.formatEther(match.betAmountTeamA.toString()))).to.be.closeTo(expectedBetAmountTeamA, 0.0000000000001);
-      expect(Number(ethers.formatEther(match.betAmountTeamB.toString()))).to.be.closeTo(expectedBetAmountTeamB, 0.0000000000001);
-      expect(Number(ethers.formatEther(match.betAmountDraw.toString()))).to.be.closeTo(expectedBetAmountDraw, 0.0000000000001);
+      expect(Number(ethers.formatEther(match.betAmountTeamA.toString()))).to.be.closeTo(expectedBetAmountTeamA, 0.000000000001);
+      expect(Number(ethers.formatEther(match.betAmountTeamB.toString()))).to.be.closeTo(expectedBetAmountTeamB, 0.000000000001);
+      expect(Number(ethers.formatEther(match.betAmountDraw.toString()))).to.be.closeTo(expectedBetAmountDraw, 0.000000000001);
 
       if(expectedBetAmountTeamA != 0) {
         expectedOddsTeamA = totalBetAmount / expectedBetAmountTeamA;
