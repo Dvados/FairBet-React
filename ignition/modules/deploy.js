@@ -1,15 +1,28 @@
-// const { buildModule } = require("@nomicfoundation/hardhat-ignition/modules");
+async function main() {
+  if (network.name === "hardhat") {
+    console.warn(
+      "You are trying to deploy a contract to the Hardhat Network, which" +
+        "gets automatically created and destroyed every time. Use the Hardhat" +
+        " option '--network localhost'"
+    );
+  }
+  
+  const [deployer] = await ethers.getSigners();
 
-// const JAN_1ST_2030 = 1893456000;
-// const ONE_GWEI = 1_000_000_000n;
+  console.log("Deploying with", await deployer.getAddress())
 
-// module.exports = buildModule("LockModule", (m) => {
-//   const unlockTime = m.getParameter("unlockTime", JAN_1ST_2030);
-//   const lockedAmount = m.getParameter("lockedAmount", ONE_GWEI);
+  const Factory = await ethers.getContractFactory("FairBet", deployer);
+  const fairBet = await Factory.deploy();
 
-//   const lock = m.contract("Lock", [unlockTime], {
-//     value: lockedAmount,
-//   });
+  // Очікуємо деплою
+  await fairBet.waitForDeployment();
 
-//   return { lock };
-// });
+  console.log("Contract deployed to:", fairBet.target);
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
