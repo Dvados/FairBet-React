@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -10,4 +14,23 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+.header {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  box-shadow: 0 -6px 10px 5px rgba(0, 0, 5, 0.5);
+}
+
+/* Define keyframes for opacity animation */
+@keyframes opacityAnimation {
+  0% { opacity: 1; } /* Start opacity */
+  50% { opacity: 0; } /* Middle opacity */
+  100% { opacity: 1; } /* End opacity */
+}
+
+/* Apply animation to the button */
+.live-button {
+  animation: opacityAnimation 3s infinite; /* Apply animation with 3s duration and infinite loop */
 }
