@@ -1,4 +1,4 @@
-export const contractABI = [
+const contractABI = [
     {
       inputs: [],
       stateMutability: "nonpayable",
@@ -346,3 +346,5 @@ export const contractABI = [
       type: "function",
     },
   ];
+
+export default contractABI;
