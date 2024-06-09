@@ -1,45 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import Main from "./pages/main/Main";
-import contractABI from "./AddressABI/contractABI";
-import contractAddress from "./AddressABI/contractAddress";
+// import contractABI from "./AddressABI/contractABI";
+// import contractAddress from "./AddressABI/contractAddress";
+import { connectWallet } from "./test/WalletUtils";
 
 const App = () => {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
+  const [connected, setConnected] = useState(false);
+  const [accountAddress, setAccountAddress] = useState("kuku");
+  const [networkError, setNetworkError] = useState("");
 
-  useEffect(() => {
-    // Функція для підключення до Ethereum провайдера (MetaMask)
-    const connectWallet = async () => {
-      if (window.ethereum) {
-        try {
-          await window.ethereum.request({ method: "eth_requestAccounts" });
-          const web3Provider = new ethers.BrowserProvider(window.ethereum);
-          const web3Signer = web3Provider.getSigner();
-          const contractInstance = new ethers.Contract(
-            contractAddress,
-            contractABI,
-            web3Signer
-          );
-
-          setProvider(web3Provider);
-          setSigner(web3Signer);
-          setContract(contractInstance);
-        } catch (error) {
-          console.error("Помилка підключення до гаманця:", error);
-        }
-      } else {
-        console.error("Ethereum провайдер не знайдено. Встановіть MetaMask.");
-      }
-    };
-
-    connectWallet();
-  }, []);
+  // Функція для підключення до Ethereum провайдера (MetaMask)
+  const handleConnectWallet = () => {
+    connectWallet(setProvider, setSigner, setContract, setConnected, setNetworkError, setAccountAddress);
+  };
 
   return (
     <div className="App">
-      <Main />
+      <Main connectWallet={handleConnectWallet} connected={connected} accountAddress={accountAddress} />
     </div>
   );
 };

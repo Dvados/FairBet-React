@@ -2,9 +2,8 @@ import React from "react";
 import '../../index.css';
 import '../../styles/fonsts.css';
 import SearchBar from '../../components/common/search-bar/searchBar.js';
-import ConnectButtonDrawer from '../../components/buttons/ConnectButtonDrawer.js';
 
-function Header({ setIsOpenWallet }) {
+function Header({ connectWallet, connected, accountAddress }) {
     return (
         <div className="flex h-16 items-center text-white bg-gray-800 header z-50">
 
@@ -23,7 +22,15 @@ function Header({ setIsOpenWallet }) {
             </div>
 
             {/* Connect Button */}
-            <ConnectButtonDrawer setIsOpenWallet={setIsOpenWallet} />
+            {!connected ? (
+                <button 
+                onClick={connectWallet}
+                className="justify-self-end bg-gray-700 hover:bg-indigo-900 py-1.5 px-12 mr-8 rounded-2xl lowercase">
+                    Connect
+                </button>
+            ) : (
+                <span>{`${accountAddress}`}</span>
+            )}
         </div>
     );
 }

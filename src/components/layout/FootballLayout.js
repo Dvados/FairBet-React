@@ -11,7 +11,7 @@ import StuttgartLogo from "../../assets/img/fc-stuttgart-logo.png";
 
 import { GiSoccerBall } from "react-icons/gi";
 
-function FootballLayout({ isOpenWallet, setIsOpenWallet }) {
+function FootballLayout({}) {
     const [isBetDetailsOpen, setIsBetDetailsOpen] = useState(false);
     const [selectedBet, setSelectedBet] = useState(null);
     const [selectedOdd, setSelectedOdd] = useState(null);
@@ -78,7 +78,7 @@ function FootballLayout({ isOpenWallet, setIsOpenWallet }) {
             </div>
 
             {/* Wallet Drawer */}
-            <WalletConnectionDrawer isOpenWallet={isOpenWallet} setIsOpenWallet={setIsOpenWallet}>
+            <WalletConnectionDrawer>
                 <div className="rounded-2xl">
                     <Wallet
                         walletName="Metamask"
