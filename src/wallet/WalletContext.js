@@ -89,8 +89,8 @@ export const WalletProvider = ({ children }) => {
     if (window.ethereum) {
       try {
         const [wallet] = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        setWallet(wallet);
         const provider = new ethers.BrowserProvider(window.ethereum);
+        setWallet(wallet);
         setProvider(provider);
       } catch (error) {
         console.error("Error connecting wallet", error);

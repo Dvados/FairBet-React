@@ -35,12 +35,12 @@ function Header({}) {
                 </button>
             ) : (
                 <p>
-                    {correctNetwork? (
+                    {!correctNetwork? (
+                        <>Change Network</>                        
+                    ) : (
                         <>
                             Network: {networkId} <br />
                         </>
-                    ) : (
-                        <>Change Network</>
                     )}
                     {wallet}
                 </p>
