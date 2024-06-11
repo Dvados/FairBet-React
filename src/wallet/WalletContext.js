@@ -9,7 +9,6 @@ export const WalletContext = createContext();
 export const WalletProvider = ({ children }) => {
   const [wallet, setWallet] = useState(null);
   const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
   const [networkId, setNetworkId] = useState(null);
   const [correctNetwork, setCorrectNetwork] = useState(false);
@@ -25,7 +24,6 @@ export const WalletProvider = ({ children }) => {
     } else {
       // Якщо немає підключених облікових записів
       setWallet(null);
-      setProvider(null);
     }
   }, []);
 
@@ -60,9 +58,7 @@ export const WalletProvider = ({ children }) => {
 
   useEffect(() => {
     if (wallet && provider) {
-      const signer = provider.getSigner();
-      setSigner(signer);
-      const contractInstance = getContract(signer);
+      const contractInstance = getContract(provider.getSigner());
       setContract(contractInstance);
       const fetchNetwork = async () => {
         const network = await provider.getNetwork();
@@ -73,7 +69,6 @@ export const WalletProvider = ({ children }) => {
       // Якщо немає підключених облікових записів або провайдера
       setWallet(null);
       setProvider(null);
-      setSigner(null);
       setContract(null);
       setNetworkId(null);
       setCorrectNetwork(false);
