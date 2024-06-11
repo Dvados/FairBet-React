@@ -26,9 +26,6 @@ export const WalletProvider = ({ children }) => {
       // Якщо немає підключених облікових записів
       setWallet(null);
       setProvider(null);
-      setSigner(null);
-      setContract(null);
-      setNetworkId(null);
     }
   }, []);
 
@@ -72,6 +69,14 @@ export const WalletProvider = ({ children }) => {
         setNetworkId(Number(network.chainId));
       };
       fetchNetwork();
+    } else {
+      // Якщо немає підключених облікових записів або провайдера
+      setWallet(null);
+      setProvider(null);
+      setSigner(null);
+      setContract(null);
+      setNetworkId(null);
+      setCorrectNetwork(false);
     }
   }, [wallet, provider]);
 
