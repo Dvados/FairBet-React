@@ -4,19 +4,12 @@ import Footer from "../../components/common/footer";
 import FootballLayout from "../../components/layout/FootballLayout";
 import '../../index.css';
 
-function Main({ connectWallet, connected, accountAddress }) {
-    // const [isOpenWallet, setIsOpenWallet] = useState(false);
-
+function Main({}) {
     return (
         <div className="">
-            <Header connectWallet={connectWallet} connected={connected} accountAddress={accountAddress} />
-            <FootballLayout 
-                // isOpenWallet={isOpenWallet} 
-                // setIsOpenWallet={setIsOpenWallet}
-                // isOpenBetslip={isOpenBetslip}
-                // setIsOpenBetslip={setIsOpenBetslip}
-            />
-            <Footer />
+            <Header/>
+            <FootballLayout/>
+            <Footer/>
         </div>
     );
 }

@@ -1,9 +1,9 @@
 import React from "react";
 
-const NetworkErrorMessage = ({ message, dismiss }) => {
+const TransactionErrorMessage = ({ message, dismiss }) => {
   return (
     <div>
-      {message}
+      TX error: {message}
       <button type="button" onClick={dismiss}>
         <span aria-hidden="true">&times;</span>
       </button>
@@ -11,4 +11,4 @@ const NetworkErrorMessage = ({ message, dismiss }) => {
   );
 };
 
-export default NetworkErrorMessage;
+export default TransactionErrorMessage;
