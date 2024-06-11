@@ -7,7 +7,7 @@ import { useWallet } from '../../wallet/UseWallet.js';
 
 
 function Header({}) {
-    const { wallet, connectWallet, network } = useWallet();
+    const { wallet, connectWallet, networkId, correctNetwork } = useWallet();
 
     return (
         <div className="flex h-16 items-center text-white bg-gray-800 header z-50">
@@ -35,7 +35,13 @@ function Header({}) {
                 </button>
             ) : (
                 <p>
-                    Network: {network} <br />
+                    {correctNetwork? (
+                        <>
+                            Network: {networkId} <br />
+                        </>
+                    ) : (
+                        <>Change Network</>
+                    )}
                     {wallet}
                 </p>
             )}

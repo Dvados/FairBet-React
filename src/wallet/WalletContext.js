@@ -12,19 +12,16 @@ export const WalletProvider = ({ children }) => {
   const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
   const [networkId, setNetworkId] = useState(null);
+  const [correctNetwork, setCorrectNetwork] = useState(false);
+
   const SEPOLIA_NETWORK_ID = 11155111;
+  const MAINNET_NETWORK_ID = 1;
 
   const handleAccountsChanged = useCallback(async ([newAddress]) => {
     if (newAddress) {
       setWallet(newAddress);
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      setProvider(provider);
-      const signer = provider.getSigner();
-      setSigner(signer);
-      const contractInstance = getContract(signer);
-      setContract(contractInstance);
-      const network = await provider.getNetwork();
-      setNetworkId(network.chainId);
+      const newProvider = new ethers.BrowserProvider(window.ethereum);
+      setProvider(newProvider);
     } else {
       // Якщо немає підключених облікових записів
       setWallet(null);
@@ -35,24 +32,18 @@ export const WalletProvider = ({ children }) => {
     }
   }, []);
 
-  // const handleChainChanged = useCallback(async () => {
-  //   if (provider) {
-  //     const network = await provider.getNetwork();
-  //     setNetworkId(network.chainId);
-  //   }
-  // }, [provider]);
-
   const handleChainChanged = useCallback(async () => {
-    if (provider) {
+    if (window.ethereum) {
       try {
-        const network = await provider.getNetwork();
-        setNetworkId(network.chainId);
+        const newProvider = new ethers.BrowserProvider(window.ethereum);
+        setProvider(newProvider);
       } catch (error) {
         console.error("Error getting network:", error);
+        setNetworkId(null); // Скидаємо networkId у разі помилки
       }
     }
-  }, [provider]);
-
+  }, []);
+  
   useEffect(() => {
     if (window.ethereum) {
       // Слухаємо зміни облікових записів
@@ -78,26 +69,29 @@ export const WalletProvider = ({ children }) => {
       setContract(contractInstance);
       const fetchNetwork = async () => {
         const network = await provider.getNetwork();
-        setNetworkId(network.chainId);
+        setNetworkId(Number(network.chainId));
       };
       fetchNetwork();
     }
   }, [wallet, provider]);
 
   useEffect(() => {
+    if (networkId === SEPOLIA_NETWORK_ID || networkId === MAINNET_NETWORK_ID) {
+      setCorrectNetwork(true);
+    } else {
+      setCorrectNetwork(false);
+    }
     console.log("Network ID:", networkId);
+    console.log("Is Correct Network", correctNetwork);
   }, [networkId]);
-  
 
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const [wallet] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        setWallet(wallet);
         const provider = new ethers.BrowserProvider(window.ethereum);
         setProvider(provider);
-        setWallet(accounts[0]);
-        const network = await provider.getNetwork();
-        setNetworkId(network.chainId);
       } catch (error) {
         console.error("Error connecting wallet", error);
       }
@@ -106,10 +100,8 @@ export const WalletProvider = ({ children }) => {
     }
   };
 
-  const isSepoliaNetwork = networkId === SEPOLIA_NETWORK_ID;
-
   return (
-    <WalletContext.Provider value={{ wallet, connectWallet, contract, networkId, isSepoliaNetwork }}>
+    <WalletContext.Provider value={{ wallet, connectWallet, contract, networkId, correctNetwork }}>
       {children}
     </WalletContext.Provider>
   );
