@@ -2,6 +2,7 @@ import React from "react";
 import '../../index.css';
 import '../../styles/fonsts.css';
 import SearchBar from '../../components/common/search-bar/searchBar.js';
+import WalletConnectionDrawer from '../side-pannels-drawers/WalletConnection.js'
 import { useWallet } from '../../wallet/UseWallet.js';
 
 
