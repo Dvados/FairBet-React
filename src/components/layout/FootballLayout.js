@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import GameCard from "../common/cards/GameCard";
 import WalletConnectionDrawer from "../side-pannels-drawers/WalletConnection";
-import Wallet from "../buttons/Wallet";
+import Wallet from "../side-pannels-drawers/buttons/Wallet";
 import BetDetailsDrawer from "../side-pannels-drawers/BetslipContainer";
 
 import RealMadridLogo from "../../assets/img/real-madrid-logo.png";
@@ -11,7 +11,7 @@ import StuttgartLogo from "../../assets/img/fc-stuttgart-logo.png";
 
 import { GiSoccerBall } from "react-icons/gi";
 
-function FootballLayout({}) {
+function FootballLayout() {
     const [isBetDetailsOpen, setIsBetDetailsOpen] = useState(false);
     const [selectedBet, setSelectedBet] = useState(null);
     const [selectedOdd, setSelectedOdd] = useState(null);
@@ -57,7 +57,7 @@ function FootballLayout({}) {
                     teamOdds1="2.25"
                     teamOdds2="2.15"
                     drawOdds="0.12"
-                    isLive={true}
+                    isLive={false}
                     onBetClick={handleBetClick}
                 />
                 <GameCard
@@ -84,10 +84,6 @@ function FootballLayout({}) {
                         walletName="Metamask"
                         walletLogo="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/2048px-MetaMask_Fox.svg.png"
                     />
-                    {/* <Wallet
-                        walletName="Metamask"
-                        walletLogo="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/2048px-MetaMask_Fox.svg.png"
-                    /> */}
                 </div>
             </WalletConnectionDrawer>
 

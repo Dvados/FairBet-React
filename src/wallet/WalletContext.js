@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { ethers } from 'ethers';
+import React, { createContext, useState, useEffect, useCallback } from "react";
+import { ethers } from "ethers";
 import { getContract } from '../contract/contract';
 
 // Створення контексту
@@ -101,7 +101,7 @@ export const WalletProvider = ({ children }) => {
   };
 
   return (
-    <WalletContext.Provider value={{ wallet, connectWallet, contract, networkId, correctNetwork }}>
+    <WalletContext.Provider value={{ wallet, connectWallet, networkId, correctNetwork }}>
       {children}
     </WalletContext.Provider>
   );

@@ -1,13 +1,25 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
+
 import '../../index.css';
 import '../../styles/fonsts.css';
+
 import SearchBar from '../../components/common/search-bar/searchBar.js';
-import WalletConnectionDrawer from '../side-pannels-drawers/WalletConnection.js'
+import WalletSideBar from "../side-pannels-drawers/WalletSideBar.js";
 import { useWallet } from '../../wallet/UseWallet.js';
 
 
 function Header({}) {
-    const { wallet, connectWallet, networkId, correctNetwork } = useWallet();
+    const [isWalletSidebarOpen, setWalletSidebarOpen] = useState(false);
+
+    const { wallet, networkId, correctNetwork } = useWallet();
+
+    const handleOpenWalletSidebar = useCallback(() => {
+        setWalletSidebarOpen(true);
+    }, []);
+    
+    const handleCloseWalletSidebar = useCallback(() => {
+        setWalletSidebarOpen(false);
+    }, []);
 
     return (
         <div className="flex h-16 items-center text-white bg-gray-800 header z-50">
@@ -27,12 +39,17 @@ function Header({}) {
             </div>
 
             {/* Connect Button */}
+            
             {!wallet ? (
-                <button 
-                onClick={connectWallet}
-                className="justify-self-end bg-gray-700 hover:bg-indigo-900 py-1.5 px-12 mr-8 rounded-2xl lowercase">
-                    Connect
-                </button>
+                <div>
+                    <button 
+                        onClick={handleOpenWalletSidebar}
+                        className="justify-self-end bg-gray-700 hover:bg-indigo-900 py-1.5 px-12 mr-8 rounded-2xl lowercase"
+                    >
+                        Connect
+                    </button>
+                    <WalletSideBar isOpen={isWalletSidebarOpen} onClose={handleCloseWalletSidebar} />
+                </div>
             ) : (
                 <p>
                     {!correctNetwork? (
