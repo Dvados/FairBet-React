@@ -5,11 +5,6 @@ import { useWallet } from "../../../wallet/UseWallet.js";
 export default function WalletsList({ onClose }) {
   const { connectWallet } = useWallet();
 
-  const handleClick = () => {
-    connectWallet();
-    onClose();
-  }
-
   return (
     <div>
       <ul>
