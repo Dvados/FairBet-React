@@ -3,18 +3,15 @@ import React, { useState, useCallback } from "react";
 import { useWallet } from "../../wallet/UseWallet.js";
 import SearchBar from "./search-bar/searchBar.js";
 import WalletSideBar from "./walletSideBar/WalletSideBar.js";
-import WalletsCurrentNetwork from "./WalletsCurrentNetwork.js";
-// import WalletSideBarDetails from "../side-pannels-drawers/WalletSideBarDetails.js";
+import WalletsCurrentNetwork from "./WalletCurrentNetwork.js";
 
 import "../../index.css";
 import "../../styles/fonsts.css";
 
-// import ethLogo from "../../assets/eth-logo.png";
-
 function Header() {
   const [isWalletSidebarOpen, setWalletSidebarOpen] = useState(false);
 
-  const { wallet, networkId, correctNetwork } = useWallet();
+  const { wallet } = useWallet();
 
   const handleOpenWalletSidebar = useCallback(() => {
     setWalletSidebarOpen(true);
