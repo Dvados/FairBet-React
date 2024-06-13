@@ -14,7 +14,7 @@ export default function WalletSideBar({ isOpen, onClose }) {
         " fixed overflow-hidden z-10 inset-0 transform ease-in-out " +
         (isOpen
           ? " transition-opacity opacity-100 duration-500 translate-x-0  "
-          : " transition-all delay-200 opacity-0 translate-x-full  ")
+          : " transition-all delay-200 opacity-0 duration-500 translate-x-full ")
       }
     >
       <section
@@ -41,9 +41,10 @@ export default function WalletSideBar({ isOpen, onClose }) {
               </header>
             )}
           </div>
-          {!wallet ? <WalletsList onClose={onClose} /> : (
-            <>Details</>
-          )}
+          {!wallet ?
+            <WalletsList /> : (
+              <>Details</>
+            )}
         </article>
       </section>
 
