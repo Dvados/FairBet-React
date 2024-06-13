@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
-import Header from "../../components/common/header";
-import Footer from "../../components/common/footer";
+import Header from "../../components/header/header";
+import Footer from "../../components/footer/footer";
 // import FootballLayout from "../../components/layout/FootballLayout";
 import BettingMarket from "../../test/FootballLayout test";
 
