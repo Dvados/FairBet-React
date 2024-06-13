@@ -15,7 +15,7 @@ export default function WalletsList({ onClose }) {
       <ul>
         <li
           className="flex flex-row items-start bg-gray-800 hover:bg-indigo-900 mx-4 mb-1 h-20 rounded-lg items-center pl-2 cursor-pointer"
-          onClick={handleClick}
+          onClick={() => { connectWallet(); onClose(); }}
         >
           <div className="border-slate-700 bg-gray-700 rounded-lg border-2 flex items-center justify-center ml-2">
             <img

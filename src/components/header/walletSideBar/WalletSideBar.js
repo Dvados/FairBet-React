@@ -42,9 +42,9 @@ export default function WalletSideBar({ isOpen, onClose }) {
             )}
           </div>
           {!wallet ?
-            <WalletsList
-              onClose={onClose}
-            /> : <>Details</>}
+            <WalletsList /> : (
+              <>Details</>
+            )}
         </article>
       </section>
 
