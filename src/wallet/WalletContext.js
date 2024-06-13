@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
-import { getContract } from '../contract/contract';
+
+import { getContract } from "../contract/contract";
 
 // Створення контексту
 export const WalletContext = createContext();
@@ -38,20 +39,23 @@ export const WalletProvider = ({ children }) => {
       }
     }
   }, []);
-  
+
   useEffect(() => {
     if (window.ethereum) {
       // Слухаємо зміни облікових записів
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
 
       // Слухаємо зміни мережі
-      window.ethereum.on('chainChanged', handleChainChanged);
+      window.ethereum.on("chainChanged", handleChainChanged);
     }
 
     return () => {
       if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        window.ethereum.removeListener('chainChanged', handleChainChanged);
+        window.ethereum.removeListener(
+          "accountsChanged",
+          handleAccountsChanged
+        );
+        window.ethereum.removeListener("chainChanged", handleChainChanged);
       }
     };
   }, [handleAccountsChanged, handleChainChanged]);
@@ -88,7 +92,9 @@ export const WalletProvider = ({ children }) => {
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
-        const [wallet] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const [wallet] = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
         const provider = new ethers.BrowserProvider(window.ethereum);
         setWallet(wallet);
         setProvider(provider);
@@ -101,7 +107,9 @@ export const WalletProvider = ({ children }) => {
   };
 
   return (
-    <WalletContext.Provider value={{ wallet, connectWallet, networkId, correctNetwork }}>
+    <WalletContext.Provider
+      value={{ wallet, connectWallet, networkId, correctNetwork }}
+    >
       {children}
     </WalletContext.Provider>
   );
