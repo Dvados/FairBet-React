@@ -2,15 +2,20 @@ import React from "react";
 
 import { useWallet } from "../../../wallet/UseWallet.js";
 
-export default function WalletsList() {
+export default function WalletsList({ onClose }) {
   const { connectWallet } = useWallet();
+
+  const handleClick = () => {
+    connectWallet();
+    onClose();
+  }
 
   return (
     <div>
       <ul>
         <li
           className="flex flex-row items-start bg-gray-800 hover:bg-indigo-900 mx-4 mb-1 h-20 rounded-lg items-center pl-2 cursor-pointer"
-          onClick={connectWallet}
+          onClick={handleClick}
         >
           <div className="border-slate-700 bg-gray-700 rounded-lg border-2 flex items-center justify-center ml-2">
             <img

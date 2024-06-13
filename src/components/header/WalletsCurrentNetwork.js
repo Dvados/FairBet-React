@@ -12,22 +12,25 @@ export default function WalletsCurrentNetwork() {
 
   return (
     <div>
-      <button className="flex flex-row items-center bg-gray-700 hover:bg-indigo-900 py-1.5 px-4 mr-2 rounded-2xl lowercase">
+      <button className="flex flex-row items-center bg-gray-700 hover:bg-indigo-900 py-1.5 px-4 mr-2 rounded-2xl">
         {!correctNetwork ? (
-          <IoWarningOutline
-            className="text-2xl"
-            title="Your wallet`s current network is unsupported."
-          />
+          <div>
+            <IoWarningOutline
+              className="text-2xl"
+              data-tooltip-id="uncorrectNetwork" 
+              data-tooltip-content="Your wallet`s current network is unsupported."
+            />
+            <Tooltip id="uncorrectNetwork" className="text-2xl mt-6"/>
+          </div>
         ) : networkId == 1 ? (
-          <div title="Custom tooltip text" data-tip data-for="ethTooltip">
+          <div data-tooltip-id="ethTooltip" data-tooltip-content="Ethereum Mainnet">
             <img src={ethLogo} className="h-6" alt="Ethereum Logo"></img>
-            <Tooltip id="ethTooltip" place="top" effect="solid">
-              Custom tooltip text
-            </Tooltip>
+            <Tooltip id="ethTooltip" className="text-2xl mt-6"/>
           </div>
         ) : networkId == 11155111 ? (
-          <div title="Custom tooltip text">
-            <img src={ethLogo} className="h-6" alt={ethLogo}></img>
+          <div data-tooltip-id="sepoliaTooltip" data-tooltip-content="Sepolia Testnet">
+            <img src={ethLogo} className="h-6" alt="Sepolia"></img>
+            <Tooltip id="sepoliaTooltip" className="text-2xl mt-6"/>
           </div>
         ) : null}
 
