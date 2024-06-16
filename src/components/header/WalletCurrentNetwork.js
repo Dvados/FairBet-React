@@ -16,9 +16,6 @@ export default function WalletsCurrentNetwork() {
   // Toggle state and function for arrow icon
   const [isOpenNetworkList, setIsOpenNetworkList] = useState(false);
 
-  // Display checkbox depending of selected network
-  // const [selectedNetwork, setSelectedNetwork] = useState(chainId);
-
   const toggleMenu = () => {
     setIsOpenNetworkList(!isOpenNetworkList);
   };
@@ -97,7 +94,7 @@ export default function WalletsCurrentNetwork() {
 
           <MenuItem
             onClick={() => {
-              window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x11155111" }] });
+              window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0xaa36a7" }] });
             }}
           >
             <div className="flex flex-row items-center text-gray-300 block p-2 rounded-lg hover:bg-gray-800 cursor-pointer">
