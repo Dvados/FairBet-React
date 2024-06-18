@@ -25,7 +25,7 @@ export default function WalletsCurrentNetwork() {
 
       {/* Current Network Icon + Change Network Button */}
       <MenuButton
-        className="flex flex-row items-center bg-gray-700 hover:bg-indigo-900 active:bg-indigo-500 py-1.5 px-4 mr-2 rounded-2xl transition-all duration-300"
+        className="flex flex-row items-center bg-gray-700 hover:bg-indigo-900 active:bg-indigo-500 active:scale-110 transition ease-in-out duration-300 py-1.5 px-4 mr-2 rounded-2xl transition-all duration-300"
         onClick={toggleMenu}
       >
         {!correctNetwork ? (

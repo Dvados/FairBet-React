@@ -8,6 +8,9 @@ module.exports = {
       spacing: {
         '1/3': '33.333333%',
       },
+      scale: {
+        '110': '1.10',
+      },
     },
   },
   plugins: [],

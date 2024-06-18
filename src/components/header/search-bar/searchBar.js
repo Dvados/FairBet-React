@@ -3,7 +3,7 @@ import React from "react";
 function SearchBar() {
     return (
         <div className="w-96">
-            <div className="border-slate-400 border-2 relative flex items-center w-full h-8 rounded-xl bg-gray-800 overflow-hidden">
+            <div className="border-slate-400 border-2 relative flex items-center w-full h-8 rounded-2xl bg-gray-800 overflow-hidden">
                 <div className="grid place-items-center h-full w-10 text-gray-500">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"

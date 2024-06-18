@@ -26,8 +26,8 @@ function Header() {
       {/* Logo */}
       <div className="ml-8 logo-main">
         <a
-          //href=
-          className="text-3xl"
+          href="#"
+          className="text-3xl hover:scale-110 transition ease-in-out duration-300"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -48,7 +48,7 @@ function Header() {
         <div>
           <button
             onClick={handleOpenWalletSidebar}
-            className="justify-self-end bg-gray-700 hover:bg-indigo-900 py-1.5 px-12 mr-8 rounded-2xl lowercase"
+            className="justify-self-end bg-gray-700 hover:bg-indigo-900 active:bg-indigo-500 active:scale-110 transition ease-in-out duration-300 py-1.5 px-12 mr-8 rounded-2xl lowercase"
           >
             Connect
           </button>
@@ -61,7 +61,7 @@ function Header() {
         <div className="flex justify-end">
           <WalletsCurrentNetwork />
           <button
-            className="justify-self-end bg-gray-700 hover:bg-indigo-900 py-1.5 px-8 mr-8 rounded-2xl lowercase"
+            className="justify-self-end bg-gray-700 hover:bg-indigo-900 active:bg-indigo-500 active:scale-110 transition ease-in-out duration-300 py-1.5 px-8 mr-8 rounded-2xl lowercase"
             onClick={handleOpenWalletSidebar}
           >
             {wallet.substring(0, 6)}...{wallet.substring(38, 42)}
