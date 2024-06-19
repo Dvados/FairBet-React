@@ -24,10 +24,11 @@ function Header() {
   return (
     <div className="flex h-16 items-center text-white bg-gray-800 header z-50">
       {/* Logo */}
-      <div className="ml-8 logo-main">
+      <div className="ml-8 logo-main hover:scale-110 transition ease-in-out duration-300">
         <a
-          href="#"
-          className="text-3xl hover:scale-110 transition ease-in-out duration-300"
+          // temporary href to prevent conflicts while compile
+          href="../../pages/main/Main.js"
+          className="text-3xl"
           target="_blank"
           rel="noopener noreferrer"
         >

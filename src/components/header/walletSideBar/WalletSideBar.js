@@ -3,6 +3,7 @@ import { Tooltip } from "react-tooltip";
 
 import WalletsList from "./WalletsList";
 import Settings from "./Settings";
+import Details from "./Details";
 import { useWallet } from "../../../wallet/UseWallet";
 
 import { IoCloseSharp } from "react-icons/io5";
@@ -75,12 +76,12 @@ export default function WalletSideBar({ isOpen, onClose }) {
                       className="ml-2 text-gray-300 hover:text-gray-400"
                     >
                       <MdContentCopy
-                        className="hover:bg-gray-600 text-4xl hover:text-gray-200 rounded-full p-2"
+                        className="text-2xl active:scale-1 hover:text-gray-200"
                       />
 
                       {/* Action after copying */}
                       {showActions && (
-                        <span className="absolute top-16 right-28 bg-gray-600 text-gray-200 text-sm py-1 px-2 rounded animation-in-out">
+                        <span className="absolute top-16 right-32 bg-gray-600 text-gray-200 text-sm py-1 px-2 rounded animation-in-out">
                           Copied
                         </span>
                       )}
@@ -122,12 +123,12 @@ export default function WalletSideBar({ isOpen, onClose }) {
             {/* Check if wallet is connected */}
             {!wallet
               ? <WalletsList onClose={onClose} />
-              : <>Details</>
+              : <Details />
             }
           </article>
         ) : (
-          <Settings 
-            onClose={onClose} 
+          <Settings
+            onClose={onClose}
             setIsSettingsOpen={setIsSettingsOpen}
           />
         )}
