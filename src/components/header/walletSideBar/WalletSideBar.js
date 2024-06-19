@@ -73,10 +73,10 @@ export default function WalletSideBar({ isOpen, onClose }) {
                       {wallet.substring(0, 6)}...{wallet.substring(38, 42)}
                     </h1>
                     <button
-                      className="ml-2 text-gray-300 hover:text-gray-400"
+                      className="ml-2 text-gray-300 hover:text-gray-400 active:scale-90"
                     >
                       <MdContentCopy
-                        className="text-2xl active:scale-1 hover:text-gray-200"
+                        className="text-2xl hover:text-gray-400"
                       />
 
                       {/* Action after copying */}
