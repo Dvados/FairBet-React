@@ -71,6 +71,7 @@ export const WalletProvider = ({ children }) => {
       fetchNetwork();
     } else {
       // Якщо немає підключених облікових записів або провайдера
+      
       setWallet(null);
       setProvider(null);
       setContract(null);
@@ -89,6 +90,7 @@ export const WalletProvider = ({ children }) => {
     console.log("Is Correct Network", correctNetwork);
   }, [networkId]);
 
+  // Connect Wallet function
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
@@ -106,9 +108,18 @@ export const WalletProvider = ({ children }) => {
     }
   };
 
+  // Disconnect Wallet function
+  const disconnectWallet = () => {
+    setWallet(null);
+    setProvider(null);
+    setContract(null);
+    setNetworkId(null);
+    setCorrectNetwork(false);
+  };
+
   return (
     <WalletContext.Provider
-      value={{ wallet, connectWallet, networkId, correctNetwork }}
+      value={{ wallet, connectWallet, disconnectWallet, networkId, correctNetwork }}
     >
       {children}
     </WalletContext.Provider>

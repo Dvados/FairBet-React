@@ -1,12 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
+import { Tooltip } from "react-tooltip";
 
 import WalletsList from "./WalletsList";
 import { useWallet } from "../../../wallet/UseWallet";
 
 import { IoCloseSharp } from "react-icons/io5";
+import { MdContentCopy } from "react-icons/md";
+import { FaGear } from "react-icons/fa6";
+import { FaPowerOff } from "react-icons/fa";
 
 export default function WalletSideBar({ isOpen, onClose }) {
   const { wallet } = useWallet();
+
+  // Function to disconnect wallet
+  const { disconnectWallet } = useWallet();
+
+  // State to show actions after clicking
+  const [showActions, setShowActions] = useState(false);
+
+  // Function to copy address to the clipboard
+  const copyText = () => {
+    navigator.clipboard.writeText(wallet);
+    setShowActions(true);
+    setTimeout(() => {
+      setShowActions(false);
+    }, 3000);
+  };
 
   return (
     <main
@@ -36,14 +55,65 @@ export default function WalletSideBar({ isOpen, onClose }) {
                 Connect a Wallet
               </header>
             ) : (
-              <header className="p-4 font-bold text-white text-lg">
-                Wallet Details
+              <header className="flex flex-row justify-between items-center p-4 font-bold text-white w-full">
+
+                {/* Wallet Details */}
+                <div className="flex flex-row items-center cursor-pointer"
+                  onClick={copyText}
+                >
+                  <h1 className="text-gray-100 hover:text-gray-400 text-lg">
+                    {wallet.substring(0, 6)}...{wallet.substring(38, 42)}
+                  </h1>
+                  <button
+                    className="ml-2 text-gray-300 hover:text-gray-400"
+                  >
+                    <MdContentCopy
+                      className="hover:bg-gray-600 text-4xl hover:text-gray-200 rounded-full p-2"
+                    />
+
+                    {/* Action after copying */}
+                    {showActions && (
+                      <span className="absolute top-16 right-28 bg-gray-600 text-gray-200 text-sm py-1 px-2 rounded animation-in-out">
+                        Copied
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                <div className="flex flex-row items-center justify-end">
+                  {/* Settings */}
+                  <button
+                    data-tooltip-id="openSettings"
+                    data-tooltip-content="Settings"
+                  >
+                    <FaGear
+                      className="hover:bg-gray-600 text-5xl text-gray-200 hover:text-gray-200 rounded-full p-2 transform transition-transform duration-300 hover:rotate-180"
+                    />
+                    <Tooltip id="openSettings" />
+                  </button>
+
+                  {/* Disconnect Wallet */}
+                  <button
+                    onClick={() => {
+                      disconnectWallet();
+                      onClose();
+                    }}
+                    data-tooltip-id="disconnectWallet"
+                    data-tooltip-content="Disconnect Wallet"
+                  >
+                    <FaPowerOff
+                      className="hover:bg-gray-600 text-5xl text-gray-200 hover:text-gray-200 rounded-full p-2 transform transition-transform duration-300 hover:rotate-180"
+                    />
+                    <Tooltip id="disconnectWallet" />
+                  </button>
+                </div>
               </header>
             )}
           </div>
-          {!wallet 
-            ? <WalletsList onClose={onClose}/> 
-            : <>Details</>}
+          {!wallet
+            ? <WalletsList onClose={onClose} />
+            : <>Details</>
+          }
         </article>
       </section>
 
