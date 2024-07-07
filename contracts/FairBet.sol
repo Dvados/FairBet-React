@@ -5,6 +5,8 @@ contract FairBet {
     // Owner
     address public owner;
 
+    uint public constant totalProbWMargin = 105;
+
     // -------------------------------
     // Matches
     uint public matchCount;
@@ -20,7 +22,7 @@ contract FairBet {
         Result matchResult;
     }
 
-    enum Status { Bets, BetsPaused, Finished }
+    enum Status { BetsPaused, Bets, Finished }
 
     enum Result { NotFinished, TeamA, Draw, TeamB }
 
@@ -44,7 +46,7 @@ contract FairBet {
     enum Selection { Nothing, TeamA, Draw, TeamB }
 
     // -------------------------------
-    uint withdrawalCount;
+    uint public withdrawalCount;
 
     event MatchCreated(uint indexed matchId, string teamA, string teamB);
     event BetsPaused(uint _matchId);
@@ -174,8 +176,8 @@ contract FairBet {
         uint totalAmount1X2 = m.betAmounts1X2[0] + m.betAmounts1X2[1] + m.betAmounts1X2[2];
 
         for (uint i = 0; i < m.betAmounts1X2.length; i++) {
-            if(m.betAmounts1X2[i] != 0){
-                m.odds1X2[i] = totalAmount1X2 * 1e18 / m.betAmounts1X2[i];
+            if(m.betAmounts1X2[i] != 0 && m.betAmounts1X2[i] != totalAmount1X2){
+                m.odds1X2[i] = totalAmount1X2 * 1e18 / (m.betAmounts1X2[i] / 100 * totalProbWMargin);
             }
         }
     }
@@ -184,8 +186,8 @@ contract FairBet {
 
     function distributeWinnings(uint _matchId) private {
         Match storage m = matches[_matchId];
-        
-        uint totalAmount1X2 = m.betAmounts1X2[0] + m.betAmounts1X2[1] + m.betAmounts1X2[2];
+
+        uint remainAmount1X2 = m.betAmounts1X2[0] + m.betAmounts1X2[1] + m.betAmounts1X2[2];
         uint odds;
 
         if (m.matchResult == Result.TeamA) {
@@ -205,11 +207,11 @@ contract FairBet {
                 uint reward = b.amount * odds / 1e18;
                 balances[b.better] += reward;
 
-                totalAmount1X2 -= reward;
+                remainAmount1X2 -= reward;
             }
         }
 
-        balances[owner] += totalAmount1X2;
+        balances[owner] += remainAmount1X2;
     }
 
     // -------------------------------
