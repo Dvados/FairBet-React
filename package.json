@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@headlessui/react": "^0.0.0-insiders.2092049",
+    "@headlessui/react": "^2.0.4",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@testing-library/jest-dom": "^6.4.5",
     "@testing-library/react": "^16.0.0",

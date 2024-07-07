@@ -14,48 +14,44 @@ contract FairBet {
     struct Match {
         string teamA;
         string teamB;
-        uint betAmountTeamA;
-        uint betAmountTeamB;
-        uint betAmountDraw;
-        uint oddsTeamA;
-        uint oddsTeamB;
-        uint oddsDraw;
+        uint[3] betAmounts1X2;   // [0] - TeamA, [1] - Draw, [2] - TeamB
+        uint[3] odds1X2;         // [0] - TeamA, [1] - Draw, [2] - TeamB
         Status matchStatus;
         Result matchResult;
     }
 
     enum Status { Bets, BetsPaused, Finished }
 
-    enum Result { NotFinished, TeamA, TeamB, Draw }
+    enum Result { NotFinished, TeamA, Draw, TeamB }
 
     // -------------------------------
     // Users
-    mapping(address => uint) public users;
+    mapping(address => uint) public balances;
 
     // -------------------------------
     // Bets
     uint public betCount;
 
-    mapping(uint => Bet) public allBets;
+    mapping(uint => Bet[]) public allBets;
 
     struct Bet {
         uint timestamp;
-        uint matchId;
         address better;
         uint amount;
         Selection resultSelection;
     }
 
-    enum Selection { Nothing, TeamA, TeamB, Draw }
+    enum Selection { Nothing, TeamA, Draw, TeamB }
 
     // -------------------------------
+    uint withdrawalCount;
 
     event MatchCreated(uint indexed matchId, string teamA, string teamB);
+    event BetsPaused(uint _matchId);
+    event BetsResumed(uint _matchId);
     event BetPlaced(uint indexed betId, uint matchId, address better, uint amount, Selection selection);
     event MatchFinished(uint indexed matchId, Result matchResult);
     event Withdrawal(uint indexed withdrawalId, address user, uint amount);
-
-    uint withdrawalCount;
 
     // -------------------------------
 
@@ -70,12 +66,35 @@ contract FairBet {
 
     // -------------------------------
 
-    function createMatch(string memory _teamA, string memory _teamB) public onlyOwner {
+    function createMatch(string calldata _teamA, string calldata _teamB) public onlyOwner {
         matchCount++;
 
-        matches[matchCount] = Match(_teamA, _teamB, 0, 0, 0, 1e18, 1e18, 1e18, Status.Bets, Result.NotFinished);
+        matches[matchCount] = Match({
+            teamA: _teamA,
+            teamB: _teamB,
+            betAmounts1X2: [uint(0), uint(0), uint(0)],
+            odds1X2: [uint(1e18), uint(1e18), uint(1e18)],
+            matchStatus: Status.Bets,
+            matchResult: Result.NotFinished
+        });
 
         emit MatchCreated(matchCount, _teamA, _teamB);
+    }
+
+    // -------------------------------
+
+    function betAmounts1X2(uint _matchId) public view returns(uint[3] memory _betAmounts1X2) {
+        Match storage m = matches[_matchId];
+
+        _betAmounts1X2 = m.betAmounts1X2;
+    }
+
+    // -------------------------------
+
+    function odds1X2(uint _matchId) public view returns(uint[3] memory _odds1X2) {
+        Match storage m = matches[_matchId];
+
+        _odds1X2 = m.odds1X2;
     }
 
     // -------------------------------
@@ -85,21 +104,26 @@ contract FairBet {
 
         require(msg.value > 0, "Bet amount must be greater than zero");
 
-        require(_selection == Selection.TeamA || _selection == Selection.TeamB || _selection == Selection.Draw, "Invalid selection");
+        require(_selection != Selection.Nothing, "Invalid selection");
 
         if (_selection == Selection.TeamA) {                    // teamA
-            matches[_matchId].betAmountTeamA += msg.value;
-        } else if (_selection == Selection.TeamB) {             // teamB
-            matches[_matchId].betAmountTeamB += msg.value;
-        } else {                                                // Draw
-            matches[_matchId].betAmountDraw += msg.value;
+            matches[_matchId].betAmounts1X2[0] += msg.value;
+        } else if (_selection == Selection.Draw) {              // Draw
+            matches[_matchId].betAmounts1X2[1] += msg.value;
+        } else {                                                // teamB
+            matches[_matchId].betAmounts1X2[2] += msg.value;
         }
 
         getOdds(_matchId);
 
         betCount++;
 
-        allBets[betCount] = Bet(block.timestamp, _matchId, msg.sender, msg.value, _selection);
+        allBets[_matchId].push(Bet({
+            timestamp: block.timestamp,
+            better: msg.sender,
+            amount: msg.value,
+            resultSelection: _selection
+        }));
 
         emit BetPlaced(betCount, _matchId, msg.sender, msg.value, _selection);
     }
@@ -107,7 +131,25 @@ contract FairBet {
     // -------------------------------
 
     function pauseBets(uint _matchId) public onlyOwner {
+        require(matches[_matchId].matchStatus != Status.Finished, "Match already finished");
+
+        require(matches[_matchId].matchStatus != Status.BetsPaused, "Betting on this match is already closed");
+
         matches[_matchId].matchStatus = Status.BetsPaused;
+
+        emit BetsPaused(_matchId);
+    }
+
+    // -------------------------------
+
+    function resumeBets(uint _matchId) public onlyOwner {
+        require(matches[_matchId].matchStatus != Status.Finished, "Match already finished");
+
+        require(matches[_matchId].matchStatus != Status.Bets, "Bets are not paused for this match");
+
+        matches[_matchId].matchStatus = Status.Bets;
+
+        emit BetsResumed(_matchId);
     }
 
     // -------------------------------
@@ -129,18 +171,12 @@ contract FairBet {
 
     function getOdds(uint _matchId) private {
         Match storage m = matches[_matchId];
-        uint totalAmount = m.betAmountTeamA + m.betAmountTeamB + m.betAmountDraw;
+        uint totalAmount1X2 = m.betAmounts1X2[0] + m.betAmounts1X2[1] + m.betAmounts1X2[2];
 
-        if(m.betAmountTeamA != 0){
-            m.oddsTeamA = totalAmount * 1e18 / m.betAmountTeamA;
-        }
-
-        if(m.betAmountTeamB != 0){
-            m.oddsTeamB = totalAmount * 1e18 / m.betAmountTeamB;
-        }
-
-        if(m.betAmountDraw != 0){
-            m.oddsDraw = totalAmount * 1e18 / m.betAmountDraw;
+        for (uint i = 0; i < m.betAmounts1X2.length; i++) {
+            if(m.betAmounts1X2[i] != 0){
+                m.odds1X2[i] = totalAmount1X2 * 1e18 / m.betAmounts1X2[i];
+            }
         }
     }
 
@@ -149,43 +185,54 @@ contract FairBet {
     function distributeWinnings(uint _matchId) private {
         Match storage m = matches[_matchId];
         
-        uint winningAmount;
+        uint totalAmount1X2 = m.betAmounts1X2[0] + m.betAmounts1X2[1] + m.betAmounts1X2[2];
         uint odds;
 
         if (m.matchResult == Result.TeamA) {
-            winningAmount = m.betAmountTeamA;
-            odds = m.oddsTeamA;
-        } else if (m.matchResult == Result.TeamB) {
-            winningAmount = m.betAmountTeamB;
-            odds = m.oddsTeamB;
+            odds = m.odds1X2[0];
         } else if (m.matchResult == Result.Draw) {
-            winningAmount = m.betAmountDraw;
-            odds = m.oddsDraw;
+            odds = m.odds1X2[1];
+        } else if (m.matchResult == Result.TeamB) {
+            odds = m.odds1X2[2];
         }
 
-        for (uint i = 1; i <= betCount; i++) {
-            Bet storage b = allBets[i];
+        Bet[] storage bets = allBets[_matchId];
 
-            if (b.matchId == _matchId && uint(b.resultSelection) == uint(m.matchResult)) {
+        for (uint i = 0; i < bets.length; i++) {
+            Bet storage b = bets[i];
+
+            if (uint(b.resultSelection) == uint(m.matchResult)) {
                 uint reward = b.amount * odds / 1e18;
-                users[b.better] += reward;
+                balances[b.better] += reward;
+
+                totalAmount1X2 -= reward;
             }
         }
+
+        balances[owner] += totalAmount1X2;
     }
 
     // -------------------------------
 
-    function withdraw() public {
-        
-        uint amount = users[msg.sender];
+    function withdraw() external {
+        uint amount = balances[msg.sender];
 
         require(amount > 0, "No balance to withdraw");
 
-        payable(msg.sender).transfer(amount);
+        balances[msg.sender] = 0;
 
-        users[msg.sender] = 0;
+        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        require(success, "Transfer failed");
+
+        //payable(msg.sender).transfer(amount);
 
         emit Withdrawal(++withdrawalCount, msg.sender, amount);
+    }
+
+    // -------------------------------
+
+    receive() external payable {
+        balances[msg.sender] += msg.value;
     }
 
 }
