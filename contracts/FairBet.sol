@@ -5,7 +5,7 @@ contract FairBet {
     // Owner
     address public owner;
 
-    uint public constant totalProbWMargin = 105;
+    uint8 public constant totalProbWMargin = 105;
 
     // -------------------------------
     // Matches
@@ -14,8 +14,8 @@ contract FairBet {
     mapping(uint => Match) public matches;
 
     struct Match {
-        string teamA;
-        string teamB;
+        bytes teamA;
+        bytes teamB;
         uint[3] betAmounts1X2;   // [0] - TeamA, [1] - Draw, [2] - TeamB
         uint[3] odds1X2;         // [0] - TeamA, [1] - Draw, [2] - TeamB
         Status matchStatus;
@@ -48,7 +48,7 @@ contract FairBet {
     // -------------------------------
     uint public withdrawalCount;
 
-    event MatchCreated(uint indexed matchId, string teamA, string teamB);
+    event MatchCreated(uint indexed matchId, bytes teamA, bytes teamB);
     event BetsPaused(uint _matchId);
     event BetsResumed(uint _matchId);
     event BetPlaced(uint indexed betId, uint matchId, address better, uint amount, Selection selection);
@@ -72,15 +72,15 @@ contract FairBet {
         matchCount++;
 
         matches[matchCount] = Match({
-            teamA: _teamA,
-            teamB: _teamB,
+            teamA: bytes(_teamA),
+            teamB: bytes(_teamB),
             betAmounts1X2: [uint(0), uint(0), uint(0)],
             odds1X2: [uint(1e18), uint(1e18), uint(1e18)],
             matchStatus: Status.Bets,
             matchResult: Result.NotFinished
         });
 
-        emit MatchCreated(matchCount, _teamA, _teamB);
+        emit MatchCreated(matchCount, bytes(_teamA), bytes(_teamB));
     }
 
     // -------------------------------
@@ -225,8 +225,6 @@ contract FairBet {
 
         (bool success, ) = payable(msg.sender).call{value: amount}("");
         require(success, "Transfer failed");
-
-        //payable(msg.sender).transfer(amount);
 
         emit Withdrawal(++withdrawalCount, msg.sender, amount);
     }
