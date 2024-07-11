@@ -101,6 +101,30 @@ contract FairBet {
 
     // -------------------------------
 
+    function pauseBets(uint _matchId) public onlyOwner {
+        require(matches[_matchId].matchStatus != Status.Finished, "Match already finished");
+
+        require(matches[_matchId].matchStatus != Status.BetsPaused, "Betting on this match is already closed");
+
+        matches[_matchId].matchStatus = Status.BetsPaused;
+
+        emit BetsPaused(_matchId);
+    }
+
+    // -------------------------------
+
+    function resumeBets(uint _matchId) public onlyOwner {
+        require(matches[_matchId].matchStatus != Status.Finished, "Match already finished");
+
+        require(matches[_matchId].matchStatus != Status.Bets, "Bets are not paused for this match");
+
+        matches[_matchId].matchStatus = Status.Bets;
+
+        emit BetsResumed(_matchId);
+    }
+
+    // -------------------------------
+
     function placeBet(uint _matchId, Selection _selection) public payable {
         require(matches[_matchId].matchStatus == Status.Bets, "Bets are no longer accepted");
 
@@ -128,30 +152,6 @@ contract FairBet {
         }));
 
         emit BetPlaced(betCount, _matchId, msg.sender, msg.value, _selection);
-    }
-
-    // -------------------------------
-
-    function pauseBets(uint _matchId) public onlyOwner {
-        require(matches[_matchId].matchStatus != Status.Finished, "Match already finished");
-
-        require(matches[_matchId].matchStatus != Status.BetsPaused, "Betting on this match is already closed");
-
-        matches[_matchId].matchStatus = Status.BetsPaused;
-
-        emit BetsPaused(_matchId);
-    }
-
-    // -------------------------------
-
-    function resumeBets(uint _matchId) public onlyOwner {
-        require(matches[_matchId].matchStatus != Status.Finished, "Match already finished");
-
-        require(matches[_matchId].matchStatus != Status.Bets, "Bets are not paused for this match");
-
-        matches[_matchId].matchStatus = Status.Bets;
-
-        emit BetsResumed(_matchId);
     }
 
     // -------------------------------
