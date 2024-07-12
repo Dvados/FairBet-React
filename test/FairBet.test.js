@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 const { expect } = require("chai");
 
 describe('FairBet', function() {
-  async function deploy(){
+  async function deploy() {
     // Getting test accounts
     const [user1, user2, user3, user4] = await ethers.getSigners();
     const users = [user1, user2, user3, user4];
@@ -12,34 +12,30 @@ describe('FairBet', function() {
     const Factory = await ethers.getContractFactory('FairBet', user4);
     // Deploying the contract
     const fairBet = await Factory.deploy();
-
     // Waiting for the deploy
     await fairBet.waitForDeployment();
 
     return { users, fairBet };
   }
 
+  async function createMatch(fairBet, teamA, teamB) {
+    const createMatchTx = await fairBet.createMatch(teamA, teamB);
+    await createMatchTx.wait();
 
-  // async function placeRandomBets(users, fairBet, numberOfBets) {
-  //   for (let i = 0; i < numberOfBets; i++) {
-  //     const randomUserIndex = Math.floor(Math.random() * users.length);
-  //     const randomUser = users[randomUserIndex];
+    return createMatchTx;
+  }
 
-  //     const randomBetAmount = (Math.random() * (5 - 0.1) + 0.1);
-  //     const betAmountInEther = ethers.parseEther(randomBetAmount.toString());
-
-  //     const randomSelection = Math.floor(Math.random() * 3 + 1);
-
-  //     const placeBetTx = await fairBet.connect(randomUser).placeBet(1, randomSelection, { value: betAmountInEther });
-  //     await placeBetTx.wait();
-  //   }
-  // }
+  async function placeBet(fairBet, user, matchId, selection, amount) {
+    const placeBetTx = await fairBet.connect(user).placeBet(matchId, selection, { value: amount });
+    await placeBetTx.wait();
+    
+    return placeBetTx;
+  }
 
 
   it('Deploys a Contract', async function() {
     // Executing the deploy function and getting the variables
     const { fairBet } = await loadFixture(deploy);
-
     expect(fairBet.target).to.be.properAddress;
 
     const balance = await ethers.provider.getBalance(fairBet.target);
@@ -50,8 +46,11 @@ describe('FairBet', function() {
   it('Create Match', async function() {
     const { fairBet } = await loadFixture(deploy);
 
-    const createMatchTx = await fairBet.createMatch('Real Madrid', 'Barcelona');
-    await createMatchTx.wait();
+    const createMatchTx = await createMatch(fairBet, 'Real Madrid', 'Barcelona');
+
+    await expect(createMatchTx)
+    .to.emit(fairBet, 'MatchCreated')
+    .withArgs(1, ethers.hexlify(ethers.toUtf8Bytes('Real Madrid')), ethers.hexlify(ethers.toUtf8Bytes('Barcelona')));
 
     const match = await fairBet.matches(1);
 
@@ -62,22 +61,23 @@ describe('FairBet', function() {
 
 
   it('Pause Bets', async function() {
-    const { fairBet } = await loadFixture(deploy);
+    const { users, fairBet } = await loadFixture(deploy);
   
-    const createMatchTx = await fairBet.createMatch('Real Madrid', 'Barcelona');
-    await createMatchTx.wait();
-  
-    await fairBet.pauseBets(1);
+    await createMatch(fairBet, 'Real Madrid', 'Barcelona');
+
+    const pauseBetsTx = await fairBet.pauseBets(1);
+
+    await expect(pauseBetsTx)
+    .to.emit(fairBet, 'BetsPaused')
+    .withArgs(1);
   
     const match = await fairBet.matches(1);
-  
     expect(match.matchStatus).to.eq(0); // Status.BetsPaused
 
     let error = 'fail';
 
     try {
-      const placeBetTx = await fairBet.placeBet(1, 1, { value: ethers.parseEther('1') });
-      await placeBetTx.wait();
+      await placeBet(fairBet, users[0], 1, 1, ethers.parseEther('1'));
     } 
     catch(err) {
       error = 'success';
@@ -88,13 +88,16 @@ describe('FairBet', function() {
 
 
   it('Resume Bets', async function() {
-    const { fairBet } = await loadFixture(deploy);
+    const { users, fairBet } = await loadFixture(deploy);
   
-    const createMatchTx = await fairBet.createMatch('Real Madrid', 'Barcelona');
-    await createMatchTx.wait();
+    await createMatch(fairBet, 'Real Madrid', 'Barcelona');
   
     await fairBet.pauseBets(1);
-    await fairBet.resumeBets(1);
+    const resumeBetsTx = await fairBet.resumeBets(1);
+
+    await expect(resumeBetsTx)
+    .to.emit(fairBet, 'BetsResumed')
+    .withArgs(1);
   
     const match = await fairBet.matches(1);
   
@@ -103,8 +106,7 @@ describe('FairBet', function() {
     let error = 'success';
 
     try {
-      const placeBetTx = await fairBet.placeBet(1, 1, { value: ethers.parseEther('1') });
-      await placeBetTx.wait();
+      await placeBet(fairBet, users[0], 1, 1, ethers.parseEther('1'));
     } 
     catch(err) {
       error = 'fail';
@@ -115,12 +117,15 @@ describe('FairBet', function() {
 
 
   it('Finish Match', async function() {
-    const { fairBet } = await loadFixture(deploy);
+    const { users, fairBet } = await loadFixture(deploy);
   
-    const createMatchTx = await fairBet.createMatch('Real Madrid', 'Barcelona');
-    await createMatchTx.wait();
+    await createMatch(fairBet, 'Real Madrid', 'Barcelona');
   
-    await fairBet.finishMatch(1, 1); // Result.TeamA
+    const finishMatchTx = await fairBet.finishMatch(1, 1); // Result.TeamA
+
+    await expect(finishMatchTx)
+    .to.emit(fairBet, 'MatchFinished')
+    .withArgs(1, 1);
   
     const match = await fairBet.matches(1);
   
@@ -130,8 +135,7 @@ describe('FairBet', function() {
     let error = 'fail';
 
     try {
-      const placeBetTx = await fairBet.placeBet(1, 1, { value: ethers.parseEther('1') });
-      await placeBetTx.wait();
+      await placeBet(fairBet, users[0], 1, 1, ethers.parseEther('1'));
     } 
     catch(err) {
       error = 'success';
@@ -144,8 +148,7 @@ describe('FairBet', function() {
   it('Place Bet', async function() {
     const { users, fairBet } = await loadFixture(deploy);
 
-    const createMatchTx = await fairBet.createMatch('Real Madrid', 'Barcelona');
-    await createMatchTx.wait();
+    await createMatch(fairBet, 'Real Madrid', 'Barcelona');
 
     const numberOfBets = 1000;  // Number of random bets
 
@@ -160,26 +163,45 @@ describe('FairBet', function() {
 
       const randomSelection = Math.floor(Math.random() * 3 + 1);
 
-      const placeBetTx = await fairBet.connect(randomUser).placeBet(1, randomSelection, { value: betAmountInWei });
-      await placeBetTx.wait();
+      const placeBetTx = await placeBet(fairBet, randomUser, 1, randomSelection, betAmountInWei);
+
+      await expect(placeBetTx)
+      .to.emit(fairBet, 'BetPlaced')
+      .withArgs(i + 1, 1, randomUser, betAmountInWei, randomSelection);
 
       await expect(placeBetTx).to.changeEtherBalance(randomUser, -betAmountInWei);
       await expect(placeBetTx).to.changeEtherBalance(fairBet.target, betAmountInWei);
 
       const bet = await fairBet.allBets(1, i);
 
-      expect(bet.better).to.eq(randomUser.address);
+      expect(bet.better).to.eq(randomUser);
       expect(bet.amount).to.eq(betAmountInWei);
       expect(bet.resultSelection).to.eq(randomSelection);
     }
   });
 
 
+  it('Should fail when placing a bet with zero amount', async function() {
+    const { users, fairBet } = await loadFixture(deploy);
+  
+    await createMatch(fairBet, 'Real Madrid', 'Barcelona');
+  
+    let error = 'fail';
+  
+    try {
+      await placeBet(fairBet, users[0], 1, 1, ethers.parseEther('0'));
+    } catch (err) {
+      error = 'success';
+    }
+  
+    expect(error).to.eq('success');
+  });
+
+
   it('Bet Amounts and Odds', async function() {
     const { users, fairBet } = await loadFixture(deploy);
 
-    const createMatchTx = await fairBet.createMatch('Real Madrid', 'Barcelona');
-    await createMatchTx.wait();
+    await createMatch(fairBet, 'Real Madrid', 'Barcelona');
 
     let expectedBetAmounts1X2 = [0, 0, 0];
     let totalBetAmount1X2 = 0;
@@ -196,8 +218,7 @@ describe('FairBet', function() {
 
       const randomSelection = Math.floor(Math.random() * 3 + 1);
 
-      const placeBetTx = await fairBet.connect(randomUser).placeBet(1, randomSelection, { value: betAmountInWei });
-      await placeBetTx.wait();
+      await placeBet(fairBet, randomUser, 1, randomSelection, betAmountInWei);
 
       expectedBetAmounts1X2[randomSelection - 1] += randomBetAmount;
 
@@ -229,8 +250,7 @@ describe('FairBet', function() {
 
     for (let i = 1; i < 4; i++) {
     
-      const createMatchTx = await fairBet.createMatch('Real Madrid', 'Barcelona');
-      await createMatchTx.wait();
+      await createMatch(fairBet, 'Real Madrid', 'Barcelona');
 
       const usersSum = new Array(3).fill(0);
 
@@ -240,8 +260,7 @@ describe('FairBet', function() {
         const randomBetAmount = (Math.random() * (5 - 0.1) + 0.1);
         const betAmountInWei = ethers.parseEther(randomBetAmount.toString());
 
-        const placeBetTx = await fairBet.connect(users[j]).placeBet(i, j + 1, { value: betAmountInWei });
-        await placeBetTx.wait();
+        await placeBet(fairBet, users[j], i, j + 1, betAmountInWei);
 
         usersSum[j] += randomBetAmount;
       }
@@ -252,13 +271,13 @@ describe('FairBet', function() {
 
       let userExpBalance = usersSum[i - 1] * Number(ethers.formatEther(odds1X2[i - 1].toString()));
 
-      const userBalance = await fairBet.balances(users[i - 1].address);
+      const userBalance = await fairBet.balances(users[i - 1]);
 
       expect(Number(ethers.formatEther(userBalance.toString()))).to.be.closeTo(userExpBalance, 0.00000000001);
     }
   });
 
-  
+
   it('Recieve and Withdraw', async function() {
     const { users, fairBet } = await loadFixture(deploy);
 
@@ -270,17 +289,21 @@ describe('FairBet', function() {
     await expect(sendEtherTx).to.changeEtherBalance(users[0], -amountToSend);
     await expect(sendEtherTx).to.changeEtherBalance(fairBet.target, amountToSend);
 
-    let userBalance = await fairBet.balances(users[0].address);
+    let userBalance = await fairBet.balances(users[0]);
 
     expect(userBalance).to.eq(amountToSend);
 
     const withdrawTx = await fairBet.connect(users[0]).withdraw();
     await withdrawTx.wait();
 
+    await expect(withdrawTx)
+    .to.emit(fairBet, 'Withdrawal')
+    .withArgs(1, users[0], amountToSend);
+
     await expect(withdrawTx).to.changeEtherBalance(users[0], amountToSend);
     await expect(withdrawTx).to.changeEtherBalance(fairBet.target, -amountToSend);
 
-    userBalance = await fairBet.balances(users[0].address);
+    userBalance = await fairBet.balances(users[0]);
 
     expect(userBalance).to.eq(0);
   });
