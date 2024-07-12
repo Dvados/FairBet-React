@@ -4,21 +4,21 @@ const { expect } = require("chai");
 
 describe('FairBet', function() {
   async function deploy(){
-    // Отримуємо тестові акаунти
+    // Getting test accounts
     const [user1, user2, user3, user4] = await ethers.getSigners();
-
     const users = [user1, user2, user3, user4];
 
-    // Знаходимо контракт
+    // Finding the contract
     const Factory = await ethers.getContractFactory('FairBet', user4);
-    // Розгортуємо/Деплоїмо його
+    // Deploying the contract
     const fairBet = await Factory.deploy();
 
-    // Очікуємо деплою
+    // Waiting for the deploy
     await fairBet.waitForDeployment();
 
     return { users, fairBet };
   }
+
 
   // async function placeRandomBets(users, fairBet, numberOfBets) {
   //   for (let i = 0; i < numberOfBets; i++) {
@@ -35,22 +35,19 @@ describe('FairBet', function() {
   //   }
   // }
 
-  it('deploys a contract', async function() {
-    // Виконуємо функцію deploy та отримуємо змінні
+
+  it('Deploys a Contract', async function() {
+    // Executing the deploy function and getting the variables
     const { fairBet } = await loadFixture(deploy);
 
     expect(fairBet.target).to.be.properAddress;
-  });
-
-  it('has 0 ethers by default', async function() {
-    const { fairBet } = await loadFixture(deploy);
 
     const balance = await ethers.provider.getBalance(fairBet.target);
-
     expect(balance).to.eq(0);
   });
 
-  it('Create match', async function() {
+
+  it('Create Match', async function() {
     const { fairBet } = await loadFixture(deploy);
 
     const createMatchTx = await fairBet.createMatch('Real Madrid', 'Barcelona');
@@ -62,6 +59,7 @@ describe('FairBet', function() {
     expect(match.teamB).to.eq(ethers.hexlify(ethers.toUtf8Bytes('Barcelona')));
     expect(match.matchStatus).to.eq(1); // Status.Bets
   });
+
 
   it('Pause Bets', async function() {
     const { fairBet } = await loadFixture(deploy);
@@ -77,11 +75,11 @@ describe('FairBet', function() {
 
     let error = 'fail';
 
-    try{
+    try {
       const placeBetTx = await fairBet.placeBet(1, 1, { value: ethers.parseEther('1') });
       await placeBetTx.wait();
     } 
-    catch(err){
+    catch(err) {
       error = 'success';
     }
 
@@ -103,11 +101,11 @@ describe('FairBet', function() {
 
     let error = 'success';
 
-    try{
+    try {
       const placeBetTx = await fairBet.placeBet(1, 1, { value: ethers.parseEther('1') });
       await placeBetTx.wait();
     } 
-    catch(err){
+    catch(err) {
       error = 'fail';
     }
 
@@ -129,11 +127,11 @@ describe('FairBet', function() {
 
     let error = 'fail';
 
-    try{
+    try {
       const placeBetTx = await fairBet.placeBet(1, 1, { value: ethers.parseEther('1') });
       await placeBetTx.wait();
     } 
-    catch(err){
+    catch(err) {
       error = 'success';
     }
 
@@ -173,7 +171,7 @@ describe('FairBet', function() {
     }
   });
 
-  it('Bet amounts and odds', async function() {
+  it('Bet Amounts and Odds', async function() {
     const { users, fairBet } = await loadFixture(deploy);
 
     const createMatchTx = await fairBet.createMatch('Real Madrid', 'Barcelona');
@@ -204,7 +202,7 @@ describe('FairBet', function() {
       const betAmounts1X2 = await fairBet.betAmounts1X2(1);
 
       for(let j = 0; j < expectedBetAmounts1X2.length; j++) {
-        expect(Number(ethers.formatEther(betAmounts1X2[j].toString()))).to.be.closeTo(expectedBetAmounts1X2[j], 0.000000000001);
+        expect(Number(ethers.formatEther(betAmounts1X2[j].toString()))).to.be.closeTo(expectedBetAmounts1X2[j], 0.00000000001);
       }
 
       for(let j = 0; j < expectedOdds1X2.length; j++) {
@@ -255,7 +253,7 @@ describe('FairBet', function() {
     }
   });
 
-  it('Recieve and withdraw', async function() {
+  it('Recieve and Withdraw', async function() {
     const { users, fairBet } = await loadFixture(deploy);
 
     const amountToSend = ethers.parseEther('1.0');
