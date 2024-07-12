@@ -86,6 +86,7 @@ describe('FairBet', function() {
     expect(error).to.eq('success');
   });
 
+
   it('Resume Bets', async function() {
     const { fairBet } = await loadFixture(deploy);
   
@@ -112,6 +113,7 @@ describe('FairBet', function() {
     expect(error).to.eq('success');
   });
 
+
   it('Finish Match', async function() {
     const { fairBet } = await loadFixture(deploy);
   
@@ -137,6 +139,7 @@ describe('FairBet', function() {
 
     expect(error).to.eq('success');
   });
+
 
   it('Place Bet', async function() {
     const { users, fairBet } = await loadFixture(deploy);
@@ -170,6 +173,7 @@ describe('FairBet', function() {
       expect(bet.resultSelection).to.eq(randomSelection);
     }
   });
+
 
   it('Bet Amounts and Odds', async function() {
     const { users, fairBet } = await loadFixture(deploy);
@@ -219,6 +223,7 @@ describe('FairBet', function() {
     }
   })
 
+
   it('Distribute Winnings', async function() {
     const { users, fairBet } = await loadFixture(deploy);
 
@@ -253,6 +258,7 @@ describe('FairBet', function() {
     }
   });
 
+  
   it('Recieve and Withdraw', async function() {
     const { users, fairBet } = await loadFixture(deploy);
 
